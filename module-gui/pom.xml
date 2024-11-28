@@ -2,10 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.goobi.workflow.plugin</groupId>
-    <artifactId>plugin-step-kick-start</artifactId>
+    <artifactId>plugin-step-batch-assignement</artifactId>
     <version>24.10-SNAPSHOT</version>
   </parent>
-  <artifactId>plugin-step-kick-start-gui</artifactId>
+  <artifactId>plugin-step-batch-assignement-gui</artifactId>
   <packaging>jar</packaging>
   <build>
     <resources>
