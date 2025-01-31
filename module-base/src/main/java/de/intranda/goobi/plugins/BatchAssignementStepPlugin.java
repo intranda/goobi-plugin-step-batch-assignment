@@ -37,14 +37,15 @@ import net.xeoh.plugins.base.annotations.PluginImplementation;
 @PluginImplementation
 @Log4j2
 public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
-    
+
+    private static final long serialVersionUID = -2686827969245187530L;
     @Getter
     private String title = "intranda_step_batch_assignement";
     @Getter
     private Step step;
     @Getter
     private String value;
-    @Getter 
+    @Getter
     private boolean allowTaskFinishButtons;
     private String returnPath;
 
@@ -52,10 +53,10 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     public void initialize(Step step, String returnPath) {
         this.returnPath = returnPath;
         this.step = step;
-                
+
         // read parameters from correct block in configuration file
         SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
-        value = myconfig.getString("value", "default value"); 
+        value = myconfig.getString("value", "default value");
         allowTaskFinishButtons = myconfig.getBoolean("allowTaskFinishButtons", false);
         log.info("BatchAssignement step plugin initialized");
     }
@@ -63,9 +64,6 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     @Override
     public PluginGuiType getPluginGuiType() {
         return PluginGuiType.FULL;
-        // return PluginGuiType.PART;
-        // return PluginGuiType.PART_AND_FULL;
-        // return PluginGuiType.NONE;
     }
 
     @Override
@@ -87,7 +85,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     public String finish() {
         return "/uii" + returnPath;
     }
-    
+
     @Override
     public int getInterfaceVersion() {
         return 0;
@@ -97,7 +95,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     public HashMap<String, StepReturnValue> validate() {
         return null;
     }
-    
+
     @Override
     public boolean execute() {
         PluginReturnValue ret = run();
@@ -108,7 +106,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     public PluginReturnValue run() {
         boolean successful = true;
         // your logic goes here
-        
+
         log.info("BatchAssignement step plugin executed");
         if (!successful) {
             return PluginReturnValue.ERROR;
