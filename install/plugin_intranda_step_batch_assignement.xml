@@ -14,8 +14,6 @@
         
         <!-- sample parameter -->
         <value>test</value>
-        <!-- display button to finish the task directly from within the entered plugin -->
-        <allowTaskFinishButtons>true</allowTaskFinishButtons>
     </config>
 
 </config_plugin>

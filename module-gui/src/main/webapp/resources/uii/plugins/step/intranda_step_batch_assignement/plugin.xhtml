@@ -1,0 +1,140 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:composite="http://java.sun.com/jsf/composite"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+    xmlns:button="http://goobi.io/button"
+    xmlns:section="http://goobi.io/section"
+    xmlns:jsf="http://xmlns.jcp.org/jsf">
+    
+    
+    <h:form
+			id="myform"
+			onkeypress="submitOnEnter(event);">
+
+			<intranda:box
+				boxType="action"
+				boxForm="true"
+				boxPadding="false"
+				boxTitle="false">
+
+				<intranda:boxTitle
+					title="#{msgs.plugin}: #{msgs[('plugin_').concat(AktuelleSchritteForm.myPlugin.title)]}"
+					icon="fa-puzzle-piece">
+					<ul class="tabs">
+						<li
+                            jsf:rendered="#{AktuelleSchritteForm.myPlugin.batches.size() > 0}"
+							class="tab #{NavigationForm.uiStatus.batchassign ne 'tab2'?'active':''}">
+							<h:commandLink
+								id="tab1"
+								action="#{NavigationForm.Reload}"
+                                immediate="true"
+								value="#{msgs.plugin_step_batch_assignement_selectBatch}">
+								<f:setPropertyActionListener
+									target="#{NavigationForm.uiStatus.batchassign}"
+									value="" />
+								<f:ajax
+									render=":myform"
+									execute=":myform" />
+							</h:commandLink>
+						</li>
+						<li
+							class="tab #{NavigationForm.uiStatus.batchassign eq 'tab2' or AktuelleSchritteForm.myPlugin.batches.size() == 0 ?'active':''}">
+							<h:commandLink
+								id="tab2"
+								action="#{NavigationForm.Reload}"
+								value="#{msgs.plugin_step_batch_assignement_createBatch}">
+								<f:setPropertyActionListener
+									target="#{NavigationForm.uiStatus.batchassign}"
+									value="tab2" />
+								<f:ajax
+									render=":myform"
+									execute=":myform" />
+							</h:commandLink>
+						</li>
+						
+					</ul>
+				</intranda:boxTitle>
+
+				<div class="tab-content">
+
+					<!-- TAB 1 - SELECT FROM THE EXISTING BATCHES -->
+					<h:panelGroup
+						class="p-0"
+						layout="block"
+						rendered="#{NavigationForm.uiStatus.batchassign ne 'tab2' and NavigationForm.uiStatus.batchassign ne 'tab3' and AktuelleSchritteForm.myPlugin.batches.size() > 0}">
+						
+                        <div class="gw-table gw-table-fixed">
+                            <div class="gw-table__wrapper">
+                                <table
+                                    class="table table-bordered table-fixed table-hover"
+                                    id="groups"
+                                    role="grid"
+                                    >
+                                    <ui:repeat
+                                        var="b"
+                                        value="#{AktuelleSchritteForm.myPlugin.batches}">
+                                        <tr role="row">
+                                            <td>
+                                                <h:outputText value="#{msgs.batch}: #{b.batchId}" rendered="#{b.batchName == null or b.batchName == ''}"/>
+                                                <h:outputText value="#{b.batchName}" />
+                                            </td>
+                                            <td>
+                                                <div class="gw-table__actions__container">
+                                                    <button
+                                                        jsf:id="edit"
+                                                        class="btn #{AktuelleSchritteForm.myPlugin.step.prozess.batch != null and b.batchId == AktuelleSchritteForm.myPlugin.step.prozess.batch.batchId ? 'btn-action' : 'btn-blank'}"
+                                                        jsf:rel="tooltip"
+                                                        jsf:action="#{AktuelleSchritteForm.myPlugin.assignToExistingBatch}">
+                                                        <i class="fa fa-check"></i>
+                                                        <f:setPropertyActionListener target="#{AktuelleSchritteForm.myPlugin.batch}" value="#{b}" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </ui:repeat>
+                                </table>
+                            </div>
+                        </div>
+                        
+					</h:panelGroup>
+                    <!-- // TAB 1 - SELECT FROM THE EXISTING BATCHES -->
+
+
+					<!-- TAB 2 - CREATE A NEW BATCH -->
+					<h:panelGroup
+						class="p-0"
+						layout="block"
+						rendered="#{NavigationForm.uiStatus.batchassign eq 'tab2' or AktuelleSchritteForm.myPlugin.batches.size() == 0}">
+						
+                        <intranda:formInputText
+                            id="input1"
+                            name="titel"
+                            label="#{msgs.plugin_step_batch_assignement_batchTitle}"
+                            field="#{AktuelleSchritteForm.myPlugin.batchNewTitle}"
+                            help="#{msgs.plugin_step_batch_assignement_batchTitle_help}" />
+                            
+                        <!-- BUTTONS -->
+                        <div class="box__actions">
+                        	<button
+        						class="btn btn-success"
+        						jsf:id="absenden"
+        						type="submit"
+        						jsf:action="#{AktuelleSchritteForm.myPlugin.assignToNewBatch}">
+        						<span class="fa fa-save" />
+        						<span>#{msgs.speichern}</span>
+        					</button>
+                        </div>
+                        <!-- // BUTTONS -->
+                
+					</h:panelGroup>
+                    <!-- // TAB 2 - CREATE A NEW BATCH -->
+
+
+				</div>
+
+			</intranda:box>
+		</h:form>
+</ui:composition>
