@@ -130,6 +130,28 @@
                             </div>
                         </div>
                         
+                        <!-- BUTTONS -->
+                        <div class="box__actions" jsf:rendered="#{AktuelleSchritteForm.myPlugin.step.prozess.batch != null}">
+                            <button
+                                class="btn btn-blank"
+                                jsf:id="docket"
+                                type="submit"
+                                jsf:action="#{AktuelleSchritteForm.myPlugin.generateBatchDocket}">
+                                <span class="fa fa-print" />
+                                <span>#{msgs.process_generateDocket}</span>
+                            </button>
+
+                            <button
+                                class="btn btn-success"
+                                jsf:id="closeBatch"
+                                type="submit"
+                                jsf:action="#{AktuelleSchritteForm.myPlugin.lockBatch}">
+                                <span class="fa fa-lock" />
+                                <span>#{msgs.plugin_step_batch_assignement_lockBatch}</span>
+                            </button>
+                        </div>
+                        <!-- // BUTTONS -->
+                        
 					</h:panelGroup>
                     <!-- // TAB 1 - SELECT FROM THE EXISTING BATCHES -->
 

@@ -13,7 +13,7 @@
         <step>*</step>
         
         <!-- batch is complete step in the workflow that shall be finished once the last process is added to the batch -->
-        <batchCompleteStep>Warten auf Vollständigkeit des Batches</batchCompleteStep>
+        <batchWaitStep>Warten auf Vollständigkeit des Batches</batchWaitStep>
 
         <!-- properties to be editable for new batches -->
         <property>Zugewiesener Scanner</property>

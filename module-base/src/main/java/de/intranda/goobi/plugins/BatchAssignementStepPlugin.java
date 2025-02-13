@@ -1,5 +1,8 @@
 package de.intranda.goobi.plugins;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,6 +29,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.faces.context.FacesContext;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.goobi.beans.Batch;
 import org.goobi.beans.Institution;
@@ -49,10 +57,13 @@ import org.goobi.production.properties.PropertyParser;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.forms.NavigationForm;
+import de.sub.goobi.helper.CloseStepHelper;
+import de.sub.goobi.helper.FacesContextHelper;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.persistence.managers.JournalManager;
 import de.sub.goobi.persistence.managers.ProcessManager;
 import de.sub.goobi.persistence.managers.PropertyManager;
+import io.goobi.workflow.xslt.XsltToPdf;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -77,7 +88,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     @Getter
     @Setter
     private String batchNewTitle;
-    private String batchCompleteStep;
+    private String batchWaitStep;
     private List<String> propertyNames;
     @Getter
     private List<Processproperty> properties;
@@ -89,7 +100,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
 
         // read parameters from correct block in configuration file
         SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
-        batchCompleteStep = myconfig.getString("batchCompleteStep");
+        batchWaitStep = myconfig.getString("batchWaitStep");
         properties = new ArrayList<Processproperty>();
         propertyNames = Arrays.asList(myconfig.getStringArray("property"));
 
@@ -246,6 +257,66 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         NavigationForm nf = Helper.getBeanByClass(NavigationForm.class);
         nf.getUiStatus().put("batchassign", "tab1");
 
+    }
+
+    /**
+     * lock this batcch
+     */
+    public void lockBatch() {
+        LoginBean loginForm = Helper.getLoginBean();
+        // run through all processes of current batch
+        List<Process> processes = getProcessesOfBatch(step.getProzess().getBatch().getBatchId());
+        for (Process process : processes) {
+            // run through all steps of process to finish the batch-wait-step
+            for (Step step : process.getSchritteList()) {
+                if (step.getTitel().equals(batchWaitStep)) {
+                    CloseStepHelper.closeStep(step, loginForm.getMyBenutzer());
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * generate Batch Docket
+     */
+    public void generateBatchDocket() {
+        Institution inst = null;
+        User user = Helper.getCurrentUser();
+        if (user != null && !user.isSuperAdmin()) {
+            // limit result to institution of current user
+            inst = user.getInstitution();
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("generate docket for process list");
+        }
+        String rootpath = ConfigurationHelper.getInstance().getXsltFolder();
+        Path xsltfile = Paths.get(rootpath, "docket_multipage.xsl");
+        FacesContext facesContext = FacesContextHelper.getCurrentFacesContext();
+        List<Process> docket = new ArrayList<>();
+        docket = ProcessManager.getProcesses(null, " istTemplate = false AND batchID = " + step.getProzess().getBatch().getBatchId(), 0,
+                ConfigurationHelper.getInstance().getBatchMaxSize(), inst);
+
+        if (!docket.isEmpty() && !facesContext.getResponseComplete()) {
+            HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+            String fileName = "batch_" + step.getProzess().getBatch().getBatchId() + ".pdf";
+            ServletContext servletContext = (ServletContext) facesContext.getExternalContext().getContext();
+            String contentType = servletContext.getMimeType(fileName);
+            response.setContentType(contentType);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
+
+            try {
+                ServletOutputStream out = response.getOutputStream();
+                XsltToPdf ern = new XsltToPdf();
+                ern.startExport(docket, out, xsltfile.toString());
+                out.flush();
+            } catch (IOException e) {
+                log.error("IOException while exporting run note", e);
+            }
+
+            facesContext.responseComplete();
+        }
     }
 
     @Override
