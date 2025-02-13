@@ -12,8 +12,13 @@
         <project>*</project>
         <step>*</step>
         
-        <!-- sample parameter -->
-        <value>test</value>
+        <!-- batch is complete step in the workflow that shall be finished once the last process is added to the batch -->
+        <batchCompleteStep>Warten auf Vollständigkeit des Batches</batchCompleteStep>
+
+        <!-- properties to be editable for new batches -->
+        <property>Zugewiesener Scanner</property>
+        <property>Kommentar zur Scannerzuweisung</property>
+
     </config>
 
 </config_plugin>

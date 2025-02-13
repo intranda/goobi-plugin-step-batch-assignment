@@ -1,6 +1,7 @@
 package de.intranda.goobi.plugins;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -27,16 +28,23 @@ import java.util.List;
 
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.goobi.beans.Batch;
+import org.goobi.beans.Institution;
 import org.goobi.beans.JournalEntry;
 import org.goobi.beans.JournalEntry.EntryType;
+import org.goobi.beans.Process;
+import org.goobi.beans.Processproperty;
 import org.goobi.beans.Step;
+import org.goobi.beans.User;
 import org.goobi.managedbeans.LoginBean;
 import org.goobi.production.enums.LogType;
 import org.goobi.production.enums.PluginGuiType;
 import org.goobi.production.enums.PluginReturnValue;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.enums.StepReturnValue;
+import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IStepPluginVersion2;
+import org.goobi.production.properties.ProcessProperty;
+import org.goobi.production.properties.PropertyParser;
 
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
@@ -44,6 +52,7 @@ import de.sub.goobi.forms.NavigationForm;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.persistence.managers.JournalManager;
 import de.sub.goobi.persistence.managers.ProcessManager;
+import de.sub.goobi.persistence.managers.PropertyManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -59,15 +68,19 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     private Step step;
     private String returnPath;
     @Getter
-    private List<Batch> batches;
+    private List<MiniBatch> batches;
 
     @Getter
     @Setter
-    private Batch batch;
+    private MiniBatch batch;
 
     @Getter
     @Setter
     private String batchNewTitle;
+    private String batchCompleteStep;
+    private List<String> propertyNames;
+    @Getter
+    private List<Processproperty> properties;
 
     @Override
     public void initialize(Step step, String returnPath) {
@@ -76,8 +89,32 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
 
         // read parameters from correct block in configuration file
         SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
-        //        value = myconfig.getString("value", "default value");
-        //        allowTaskFinishButtons = myconfig.getBoolean("allowTaskFinishButtons", false);
+        batchCompleteStep = myconfig.getString("batchCompleteStep");
+        properties = new ArrayList<Processproperty>();
+        propertyNames = Arrays.asList(myconfig.getStringArray("property"));
+
+        // first load the property configuration
+        List<ProcessProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(step.getProzess());
+        for (ProcessProperty pt : plist) {
+            if (pt.getProzesseigenschaft() == null) {
+                Processproperty pe = new Processproperty();
+                pe.setProzess(step.getProzess());
+                pt.setProzesseigenschaft(pe);
+                step.getProzess().getEigenschaften().add(pe);
+                pt.transfer();
+            }
+        }
+
+        // then load the properties themselves
+        List<Processproperty> allProps = step.getProzess().getEigenschaftenList();
+        for (Processproperty p : allProps) {
+            for (String s : propertyNames) {
+                if (p.getTitel().equals(s)) {
+                    properties.add(p);
+                    break;
+                }
+            }
+        }
 
         // get a list of all open batches
         collectAvailableBatches();
@@ -92,31 +129,106 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         List<Batch> allBatches = ProcessManager.getBatches(ConfigurationHelper.getInstance().getBatchMaxSize());
         batches = new ArrayList<>();
         for (Batch b : allBatches) {
-            batches.add(b);
+            MiniBatch mb = new MiniBatch();
+            mb.setBatchId(b.getBatchId());
+            mb.setBatchName(b.getBatchName());
+            mb.setProperties(new ArrayList<Processproperty>());
+
+            // request the currently assigned processes
+            List<Process> processes = getProcessesOfBatch(b.getBatchId());
+            mb.setNumberOfProcesses(processes.size());
+
+            // get desired properties of the first process in existing batch
+            if (processes.size() > 0) {
+                Process p = processes.get(0);
+                for (Processproperty prop : p.getEigenschaften()) {
+                    for (Processproperty myprop : properties) {
+                        if (myprop.getTitel().equals(prop.getTitel())) {
+                            mb.getProperties().add(prop);
+                        }
+                    }
+
+                }
+            }
+
+            batches.add(mb);
         }
+    }
+
+    /**
+     * get a list of all processes of a given batch
+     *
+     * @param id
+     * @return
+     */
+    private List<Process> getProcessesOfBatch(int id) {
+        String filter = FilterHelper.criteriaBuilder("", false, null, null, null, true, false);
+        if (!filter.isEmpty()) {
+            filter += " AND ";
+        }
+        filter += " istTemplate = false AND batchID = " + id;
+        Institution inst = null;
+        User user = Helper.getCurrentUser();
+        if (user != null && !user.isSuperAdmin()) {
+            inst = user.getInstitution();
+        }
+        return ProcessManager.getProcesses("prozesse.titel", filter, 0, ConfigurationHelper.getInstance().getBatchMaxSize(), inst);
     }
 
     /**
      * assign a selected batch
      */
     public void assignToExistingBatch() {
-        System.out.println("Batch title: " + batch.getBatchName());
-        step.getProzess().setBatch(batch);
-        ProcessManager.saveProcessInformation(step.getProzess());
+        Process p = step.getProzess();
+
+        // copy properies from first process in batch
+        List<Process> processes = getProcessesOfBatch(batch.getBatchId());
+        if (processes.size() > 0) {
+            Process firstProcess = processes.get(0);
+
+            for (Processproperty prop : firstProcess.getEigenschaften()) {
+                if (propertyNames.contains(prop.getTitel())) {
+
+                    // try to set the existing property to the same value
+                    boolean found = false;
+                    for (Processproperty myprop : p.getEigenschaften()) {
+                        if (myprop.getTitel().equals(prop.getTitel())) {
+                            found = true;
+                            myprop.setWert(prop.getWert());
+                            PropertyManager.saveProcessProperty(myprop);
+                            break;
+                        }
+                    }
+
+                    // if property could not be found add it here
+                    if (!found) {
+                        Processproperty newProp = new Processproperty();
+                        newProp.setTitel(prop.getTitel());
+                        newProp.setWert(prop.getWert());
+                        newProp.setProzess(p);
+                        PropertyManager.saveProcessProperty(newProp);
+                    }
+                }
+            }
+        }
+
+        // assign to the same batch
+        Batch b = ProcessManager.getBatchById(batch.getBatchId());
+        p.setBatch(b);
+        ProcessManager.saveProcessInformation(p);
 
         // add a log entry
         LoginBean loginForm = Helper.getLoginBean();
         JournalEntry logEntry = new JournalEntry(step.getProzess().getId(), new Date(), loginForm.getMyBenutzer().getNachVorname(), LogType.DEBUG,
                 "added process to batch " + batch.getBatchId(), EntryType.PROCESS);
         JournalManager.saveJournalEntry(logEntry);
+        collectAvailableBatches();
     }
 
     /**
      * create a new batch and assign the current process to it
      */
     public void assignToNewBatch() {
-        System.out.println("Batch title: " + batchNewTitle);
-
         // create a new batch
         Batch batch = new Batch();
         batch.setBatchName(batchNewTitle);

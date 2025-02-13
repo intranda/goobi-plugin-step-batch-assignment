@@ -58,7 +58,7 @@
 					</ul>
 				</intranda:boxTitle>
 
-				<div class="tab-content">
+				<div class="box__body">
 
 					<!-- TAB 1 - SELECT FROM THE EXISTING BATCHES -->
 					<h:panelGroup
@@ -66,10 +66,10 @@
 						layout="block"
 						rendered="#{NavigationForm.uiStatus.batchassign ne 'tab2' and NavigationForm.uiStatus.batchassign ne 'tab3' and AktuelleSchritteForm.myPlugin.batches.size() > 0}">
 						
-                        <div class="gw-table gw-table-fixed">
+                        <div class="gw-table">
                             <div class="gw-table__wrapper">
                                 <table
-                                    class="table table-bordered table-fixed table-hover"
+                                    class="table table-bordered table-hover"
                                     id="groups"
                                     role="grid"
                                     >
@@ -77,11 +77,42 @@
                                         var="b"
                                         value="#{AktuelleSchritteForm.myPlugin.batches}">
                                         <tr role="row">
-                                            <td>
+                                            <td class="w-75 p-2">
                                                 <h:outputText value="#{msgs.batch}: #{b.batchId}" rendered="#{b.batchName == null or b.batchName == ''}"/>
                                                 <h:outputText value="#{b.batchName}" />
+                                                
+                                                <table
+                                                    class="table table-bordered border-start border-end mt-3"
+                                                    id="groups"
+                                                    role="grid">
+                                                    
+                                                     <tr role="row">
+                                                        <td class="w-50">
+                                                            <h:outputText value="#{msgs.prozesse}:" />
+                                                        </td>
+                                                        <td>
+                                                            <h:outputText value="#{b.numberOfProcesses}" />
+                                                        </td>
+                                                    </tr>
+                                                        
+                                                    <ui:repeat
+                                                        value="#{b.properties}"
+                                                        var="property">
+                                                        <tr role="row">
+                                                            <td>
+                                                                <h:outputText value="#{property.titel}:" />
+                                                            </td>
+                                                            <td>
+                                                                <h:outputText value="#{property.wert}" />
+                                                            </td>
+                                                        </tr>
+                                                    </ui:repeat>
+                                                
+                                                </table>
+                                                
                                             </td>
                                             <td>
+                                            
                                                 <div class="gw-table__actions__container">
                                                     <button
                                                         jsf:id="edit"
@@ -115,6 +146,15 @@
                             label="#{msgs.plugin_step_batch_assignement_batchTitle}"
                             field="#{AktuelleSchritteForm.myPlugin.batchNewTitle}"
                             help="#{msgs.plugin_step_batch_assignement_batchTitle_help}" />
+                        
+                        <ui:repeat
+                            value="#{AktuelleSchritteForm.myPlugin.properties}"
+                            var="property">                            
+                            <intranda:formInputText
+                                name="titel"
+                                label="#{property.titel}"
+                                field="#{property.wert}" />
+                        </ui:repeat>
                             
                         <!-- BUTTONS -->
                         <div class="box__actions">
