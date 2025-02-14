@@ -118,7 +118,9 @@
                                                         jsf:id="edit"
                                                         class="btn #{AktuelleSchritteForm.myPlugin.step.prozess.batch != null and b.batchId == AktuelleSchritteForm.myPlugin.step.prozess.batch.batchId ? 'btn-action' : 'btn-blank'}"
                                                         jsf:rel="tooltip"
-                                                        jsf:action="#{AktuelleSchritteForm.myPlugin.assignToExistingBatch}">
+                                                        jsf:action="#{AktuelleSchritteForm.myPlugin.assignToExistingBatch}"
+                                                        title="#{msgs.plugin_step_batch_assignement_assignToThisBatch}"
+                                                        data-bs-toggle="tooltip">
                                                         <i class="fa fa-check"></i>
                                                         <f:setPropertyActionListener target="#{AktuelleSchritteForm.myPlugin.batch}" value="#{b}" />
                                                     </button>
@@ -132,23 +134,21 @@
                         
                         <!-- BUTTONS -->
                         <div class="box__actions" jsf:rendered="#{AktuelleSchritteForm.myPlugin.step.prozess.batch != null}">
+                            
+                            
+                            <!-- BUTTON TO SHOW THE MODAL -->
                             <button
-                                class="btn btn-blank"
-                                jsf:id="docket"
-                                type="submit"
-                                jsf:action="#{AktuelleSchritteForm.myPlugin.generateBatchDocket}">
-                                <span class="fa fa-print" />
-                                <span>#{msgs.process_generateDocket}</span>
-                            </button>
-
-                            <button
+                                id="myStyleModalButton"
+                                type="button"
                                 class="btn btn-success"
-                                jsf:id="closeBatch"
-                                type="submit"
-                                jsf:action="#{AktuelleSchritteForm.myPlugin.lockBatch}">
-                                <span class="fa fa-lock" />
+                                data-bs-toggle="modal"
+                                data-bs-target="#myStyleModal">
+                                <span class="fa fa-check" />
+                                <span class="fa fa-check" style="margin-left:-6px"/>
                                 <span>#{msgs.plugin_step_batch_assignement_lockBatch}</span>
                             </button>
+                            <!-- // BUTTON TO SHOW THE MODAL -->
+                            
                         </div>
                         <!-- // BUTTONS -->
                         
@@ -186,7 +186,7 @@
         						type="submit"
         						jsf:action="#{AktuelleSchritteForm.myPlugin.assignToNewBatch}">
         						<span class="fa fa-save" />
-        						<span>#{msgs.speichern}</span>
+        						<span>#{msgs.plugin_step_batch_assignement_createNewBatch}</span>
         					</button>
                         </div>
                         <!-- // BUTTONS -->
@@ -198,5 +198,57 @@
 				</div>
 
 			</intranda:box>
+        
+            <!-- THE MODAL -->
+            <div
+                class="modal fade"
+                id="myStyleModal"
+                tabindex="-1"
+                role="dialog"
+                aria-labelledby="myModalLabel">
+                <div
+                    class="modal-dialog"
+                    role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h4 class="modal-title" id="myModalLabel">
+                                <h:outputText value="#{msgs.plugin_step_batch_assignement_lockBatchHeader}" />
+                            </h4>
+                            <button type="button" class="btn text-white"
+                                title="#{msgs.cancel}" data-bs-dismiss="modal">
+                                <span class="fa fa-times" />
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            #{msgs.plugin_step_batch_assignement_lockBatchDescription}
+                        </div>
+                        <div class="modal-footer">
+                            
+                            <button
+                                class="btn btn-blank"
+                                jsf:id="docket"
+                                type="submit"
+                                jsf:action="#{AktuelleSchritteForm.myPlugin.generateBatchDocket}">
+                                <span class="fa fa-print" />
+                                <span>#{msgs.plugin_step_batch_assignement_downloadDocket}</span>
+                            </button>
+    
+                            <button
+                                class="btn btn-success"
+                                jsf:id="closeBatch"
+                                type="submit"
+                                jsf:action="#{AktuelleSchritteForm.myPlugin.lockBatch}">
+                                <span class="fa fa-check" />
+                                <span class="fa fa-check" style="margin-left:-6px"/>
+                                <span>#{msgs.plugin_step_batch_assignement_lockBatch}</span>
+                            </button>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- // THE MODAL -->
+
 		</h:form>
+        
 </ui:composition>

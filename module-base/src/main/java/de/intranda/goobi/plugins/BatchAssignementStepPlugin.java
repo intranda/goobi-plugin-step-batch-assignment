@@ -44,6 +44,7 @@ import org.goobi.beans.Processproperty;
 import org.goobi.beans.Step;
 import org.goobi.beans.User;
 import org.goobi.managedbeans.LoginBean;
+import org.goobi.managedbeans.StepBean;
 import org.goobi.production.enums.LogType;
 import org.goobi.production.enums.PluginGuiType;
 import org.goobi.production.enums.PluginReturnValue;
@@ -137,7 +138,8 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
      * request all Batches which are currently available for the assignement
      */
     private void collectAvailableBatches() {
-        List<Batch> allBatches = ProcessManager.getBatches(ConfigurationHelper.getInstance().getBatchMaxSize());
+        List<Batch> allBatches = ProcessManager
+                .getBatches(FilterHelper.criteriaBuilder("\"-stepdone:" + batchWaitStep + "\"", false, null, null, null, true, false), 0, 20, null);
         batches = new ArrayList<>();
         for (Batch b : allBatches) {
             MiniBatch mb = new MiniBatch();
@@ -173,17 +175,14 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
      * @return
      */
     private List<Process> getProcessesOfBatch(int id) {
-        String filter = FilterHelper.criteriaBuilder("", false, null, null, null, true, false);
-        if (!filter.isEmpty()) {
-            filter += " AND ";
-        }
-        filter += " istTemplate = false AND batchID = " + id;
+        StringBuilder filter = new StringBuilder().append(FilterHelper.criteriaBuilder("", false, null, null, null, true, false));
+        filter.append(" AND istTemplate = false AND batchID = ").append(id);
         Institution inst = null;
         User user = Helper.getCurrentUser();
         if (user != null && !user.isSuperAdmin()) {
             inst = user.getInstitution();
         }
-        return ProcessManager.getProcesses("prozesse.titel", filter, 0, ConfigurationHelper.getInstance().getBatchMaxSize(), inst);
+        return ProcessManager.getProcesses("prozesse.titel", filter.toString(), 0, ConfigurationHelper.getInstance().getBatchMaxSize(), inst);
     }
 
     /**
@@ -262,7 +261,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     /**
      * lock this batcch
      */
-    public void lockBatch() {
+    public String lockBatch() {
         LoginBean loginForm = Helper.getLoginBean();
         // run through all processes of current batch
         List<Process> processes = getProcessesOfBatch(step.getProzess().getBatch().getBatchId());
@@ -275,6 +274,10 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
                 }
             }
         }
+
+        // finish current step
+        StepBean sb = Helper.getBeanByClass(StepBean.class);
+        return sb.SchrittDurchBenutzerAbschliessen();
     }
 
     /**
