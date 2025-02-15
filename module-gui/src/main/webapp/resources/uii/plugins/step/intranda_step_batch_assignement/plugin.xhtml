@@ -100,10 +100,10 @@
                                                         var="property">
                                                         <tr role="row">
                                                             <td>
-                                                                <h:outputText value="#{property.titel}:" />
+                                                                <h:outputText value="#{property.name}:" />
                                                             </td>
                                                             <td>
-                                                                <h:outputText value="#{property.wert}" />
+                                                                <h:outputText value="#{property.value}" />
                                                             </td>
                                                         </tr>
                                                     </ui:repeat>
@@ -171,11 +171,11 @@
                         
                         <ui:repeat
                             value="#{AktuelleSchritteForm.myPlugin.properties}"
-                            var="property">                            
+                            var="property">               
                             <intranda:formInputText
                                 name="titel"
-                                label="#{property.titel}"
-                                field="#{property.wert}" />
+                                label="#{property.name}"
+                                field="#{property.value}" />
                         </ui:repeat>
                             
                         <!-- BUTTONS -->
