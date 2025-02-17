@@ -74,6 +74,7 @@ import net.xeoh.plugins.base.annotations.PluginImplementation;
 @Log4j2
 public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
 
+    private static final long serialVersionUID = -1178690277971117431L;
     @Getter
     private String title = "intranda_step_batch_assignement";
     @Getter
@@ -102,7 +103,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         // read parameters from correct block in configuration file
         SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
         batchWaitStep = myconfig.getString("batchWaitStep");
-        properties = new ArrayList<ProcessProperty>();
+        properties = new ArrayList<>();
         propertyNames = Arrays.asList(myconfig.getStringArray("property"));
 
         // first load the property configuration
@@ -123,23 +124,22 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
      * request all Batches which are currently available for the assignement
      */
     private void collectAvailableBatches() {
-        List<Batch> allBatches = ProcessManager.getBatches(20);
-        //        List<Batch> allBatches = ProcessManager
-        //                .getBatchesWithFilter(FilterHelper.criteriaBuilder("\"-stepdone:" + batchWaitStep + "\"", false, null, null, null, true, false), 0,
-        //                        20, null);
+        List<Batch> allBatches = ProcessManager
+                .getBatchesWithFilter(FilterHelper.criteriaBuilder("\"-stepdone:" + batchWaitStep + "\"", false, null, null, null, true, false), 0,
+                        20, null);
         batches = new ArrayList<>();
         for (Batch b : allBatches) {
             MiniBatch mb = new MiniBatch();
             mb.setBatchId(b.getBatchId());
             mb.setBatchName(b.getBatchName());
-            mb.setProperties(new ArrayList<ProcessProperty>());
+            mb.setProperties(new ArrayList<>());
 
             // request the currently assigned processes
             List<Process> processes = getProcessesOfBatch(b.getBatchId());
             mb.setNumberOfProcesses(processes.size());
 
             // get desired properties of the first process in existing batch
-            if (processes.size() > 0) {
+            if (!processes.isEmpty()) {
                 Process p = processes.get(0);
                 List<ProcessProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(p);
                 for (ProcessProperty prop : plist) {
@@ -178,7 +178,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
 
         // copy properies from first process in batch
         List<Process> processes = getProcessesOfBatch(batch.getBatchId());
-        if (processes.size() > 0) {
+        if (!processes.isEmpty()) {
             Process firstProcess = processes.get(0);
 
             for (Processproperty prop : firstProcess.getEigenschaften()) {
@@ -225,9 +225,9 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
      */
     public void assignToNewBatch() {
         // create a new batch
-        Batch batch = new Batch();
-        batch.setBatchName(batchNewTitle);
-        step.getProzess().setBatch(batch);
+        Batch newBatch = new Batch();
+        newBatch.setBatchName(batchNewTitle);
+        step.getProzess().setBatch(newBatch);
         for (ProcessProperty pp : properties) {
             if (pp.getProzesseigenschaft() == null) {
                 Processproperty pe = new Processproperty();
@@ -248,7 +248,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         // add a log entry
         LoginBean loginForm = Helper.getLoginBean();
         JournalEntry logEntry = new JournalEntry(step.getProzess().getId(), new Date(), loginForm.getMyBenutzer().getNachVorname(), LogType.DEBUG,
-                "added process to batch " + batch.getBatchId(), EntryType.PROCESS);
+                "added process to batch " + newBatch.getBatchId(), EntryType.PROCESS);
         JournalManager.saveJournalEntry(logEntry);
         collectAvailableBatches();
 
@@ -267,9 +267,9 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         List<Process> processes = getProcessesOfBatch(step.getProzess().getBatch().getBatchId());
         for (Process process : processes) {
             // run through all steps of process to finish the batch-wait-step
-            for (Step step : process.getSchritteList()) {
-                if (step.getTitel().equals(batchWaitStep)) {
-                    CloseStepHelper.closeStep(step, loginForm.getMyBenutzer());
+            for (Step other : process.getSchritteList()) {
+                if (other.getTitel().equals(batchWaitStep)) {
+                    CloseStepHelper.closeStep(other, loginForm.getMyBenutzer());
                     break;
                 }
             }
@@ -297,8 +297,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         String rootpath = ConfigurationHelper.getInstance().getXsltFolder();
         Path xsltfile = Paths.get(rootpath, "docket_multipage.xsl");
         FacesContext facesContext = FacesContextHelper.getCurrentFacesContext();
-        List<Process> docket = new ArrayList<>();
-        docket = ProcessManager.getProcesses(null, " istTemplate = false AND batchID = " + step.getProzess().getBatch().getBatchId(), 0,
+        List<Process> docket = ProcessManager.getProcesses(null, " istTemplate = false AND batchID = " + step.getProzess().getBatch().getBatchId(), 0,
                 ConfigurationHelper.getInstance().getBatchMaxSize(), inst);
 
         if (!docket.isEmpty() && !facesContext.getResponseComplete()) {
@@ -354,7 +353,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
 
     @Override
     public HashMap<String, StepReturnValue> validate() {
-        return null;
+        return null; //NOSONAR
     }
 
     @Override
