@@ -100,6 +100,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         this.returnPath = returnPath;
         this.step = step;
 
+
         // read parameters from correct block in configuration file
         SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
         batchWaitStep = myconfig.getString("batchWaitStep");
