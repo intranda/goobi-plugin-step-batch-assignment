@@ -1,6 +1,6 @@
 ---
 title: Batch zuweisen
-identifier: intranda_step_batch_assignement
+identifier: intranda_step_batch_assignment
 description: Step Plugin für die Zuweisung des Vorgangs zu einem bestehenden oder neuen Batch
 published: true
 ---
@@ -50,7 +50,7 @@ Durch das Schließen des Batches, wird der Arbeitsschritt für das Warten auf Vo
 ![Weiterer Verlauf des Workflows](screen6_de.png)
 
 ## Konfiguration
-Die Konfiguration des Plugins erfolgt in der Datei `plugin_intranda_step_batch_assignement.xml` wie hier aufgezeigt:
+Die Konfiguration des Plugins erfolgt in der Datei `plugin_intranda_step_batch_assignment.xml` wie hier aufgezeigt:
 
 {{CONFIG_CONTENT}}
 

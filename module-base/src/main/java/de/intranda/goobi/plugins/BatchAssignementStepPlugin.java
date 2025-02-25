@@ -72,11 +72,11 @@ import net.xeoh.plugins.base.annotations.PluginImplementation;
 
 @PluginImplementation
 @Log4j2
-public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
+public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
 
     private static final long serialVersionUID = -1178690277971117431L;
     @Getter
-    private String title = "intranda_step_batch_assignement";
+    private String title = "intranda_step_batch_assignment";
     @Getter
     private Step step;
     private String returnPath;
@@ -118,11 +118,11 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
         // get a list of all open batches
         collectAvailableBatches();
 
-        log.info("BatchAssignement step plugin initialized");
+        log.info("BatchAssignment step plugin initialized");
     }
 
     /**
-     * request all Batches which are currently available for the assignement
+     * request all Batches which are currently available for the assignment
      */
     private void collectAvailableBatches() {
         List<Batch> allBatches = ProcessManager
@@ -329,7 +329,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
 
     @Override
     public String getPagePath() {
-        return "/uii/plugin_step_batch_assignement.xhtml";
+        return "/uii/plugin_step_batch_assignment.xhtml";
     }
 
     @Override
@@ -367,7 +367,7 @@ public class BatchAssignementStepPlugin implements IStepPluginVersion2 {
     public PluginReturnValue run() {
         boolean successful = true;
         // your logic goes here
-        log.info("BatchAssignement step plugin executed");
+        log.info("BatchAssignment step plugin executed");
         if (!successful) {
             return PluginReturnValue.ERROR;
         }

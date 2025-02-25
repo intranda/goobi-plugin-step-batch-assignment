@@ -1,4 +1,4 @@
-# Goobi workflow Plugin: goobi-plugin-step-batch-assignement
+# Goobi workflow Plugin: goobi-plugin-step-batch-assignment
 
 <img src="https://goobi.io/wp-content/uploads/logo_goobi_plugin.png" align="right" style="margin:0 0 20px 20px;" alt="Plugin for Goobi workflow" width="175" height="109">
 
@@ -12,11 +12,11 @@ More information about the functionality of this plugin and the complete documen
 
 Detail                      | Description
 --------------------------- | ----------------------
-**Plugin identifier**       | intranda_step_batch_assignement
+**Plugin identifier**       | intranda_step_batch_assignment
 **Plugin type**             | step
 **Licence**                 | GPL 2.0 or newer
-**Documentation (German)**  | https://docs.goobi.io/workflow-plugins/v/ger/step/goobi-plugin-step-batch-assignement
-**Documentation (English)** | https://docs.goobi.io/workflow-plugins/v/eng/step/goobi-plugin-step-batch-assignement
+**Documentation (German)**  | https://docs.goobi.io/workflow-plugins/v/ger/step/goobi-plugin-step-batch-assignment
+**Documentation (English)** | https://docs.goobi.io/workflow-plugins/v/eng/step/goobi-plugin-step-batch-assignment
 
 ## Goobi details
 

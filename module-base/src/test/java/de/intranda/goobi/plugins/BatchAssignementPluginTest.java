@@ -43,7 +43,7 @@ import ugh.fileformats.mets.MetsMods;
 @PrepareForTest({ MetadatenHelper.class, VariableReplacer.class, ConfigurationHelper.class, ProcessManager.class,
         MetadataManager.class })
 @PowerMockIgnore({ "javax.management.*", "javax.xml.*", "org.xml.*", "org.w3c.*", "javax.net.ssl.*", "jdk.internal.reflect.*" })
-public class BatchAssignementPluginTest {
+public class BatchAssignmentPluginTest {
 
     private static String resourcesFolder;
 
@@ -71,13 +71,13 @@ public class BatchAssignementPluginTest {
 
     @Test
     public void testConstructor() throws Exception {
-        BatchAssignementStepPlugin plugin = new BatchAssignementStepPlugin();
+        BatchAssignmentStepPlugin plugin = new BatchAssignmentStepPlugin();
         assertNotNull(plugin);
     }
 
     @Test
     public void testInit() {
-        BatchAssignementStepPlugin plugin = new BatchAssignementStepPlugin();
+        BatchAssignmentStepPlugin plugin = new BatchAssignmentStepPlugin();
         plugin.initialize(step, "something");
         assertEquals(step.getTitel(), plugin.getStep().getTitel());
     }
@@ -154,7 +154,7 @@ public class BatchAssignementPluginTest {
 
     public Process getProcess() {
         Project project = new Project();
-        project.setTitel("BatchAssignementProject");
+        project.setTitel("BatchAssignmentProject");
 
         Process process = new Process();
         process.setTitel("00469418X");

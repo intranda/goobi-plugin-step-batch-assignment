@@ -7,7 +7,7 @@
     <relativePath />
   </parent>
   <groupId>io.goobi.workflow.plugin</groupId>
-  <artifactId>plugin-step-batch-assignement</artifactId>
+  <artifactId>plugin-step-batch-assignment</artifactId>
   <packaging>pom</packaging>
   <modules>
     <module>module-base</module>

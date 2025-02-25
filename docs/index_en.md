@@ -1,6 +1,6 @@
 ---
 title: Assign batch
-identifier: intranda_step_batch_assignement
+identifier: intranda_step_batch_assignment
 description: Step plugin for assigning the process to an existing or new batch
 published: true
 ---
@@ -50,7 +50,7 @@ By closing the batch, the workflow step for waiting for all processes in the bat
 ![Further progress of the workflow](screen6_en.png)
 
 ## Configuration
-The plugin is configured in the file `plugin_intranda_step_batch_assignement.xml` as shown here:
+The plugin is configured in the file `plugin_intranda_step_batch_assignment.xml` as shown here:
 
 {{CONFIG_CONTENT}}
 
