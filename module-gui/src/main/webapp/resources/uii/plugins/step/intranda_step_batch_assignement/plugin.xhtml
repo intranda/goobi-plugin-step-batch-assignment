@@ -4,7 +4,7 @@
     xmlns:composite="http://java.sun.com/jsf/composite"
     xmlns:f="http://java.sun.com/jsf/core"
     xmlns:h="http://java.sun.com/jsf/html"
-    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
     xmlns:button="http://goobi.io/button"
     xmlns:section="http://goobi.io/section"
     xmlns:properties="http://goobi.io/properties"
@@ -12,8 +12,8 @@
     xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:c="http://java.sun.com/jsp/jstl/core"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
-    
-    
+
+
     <h:form
 			id="myform"
 			onkeypress="submitOnEnter(event);">
@@ -58,7 +58,7 @@
 									execute=":myform" />
 							</h:commandLink>
 						</li>
-						
+
 					</ul>
 				</intranda:boxTitle>
 
@@ -69,13 +69,13 @@
 						class="p-0"
 						layout="block"
 						rendered="#{NavigationForm.uiStatus.batchassign ne 'tab2' and NavigationForm.uiStatus.batchassign ne 'tab3' and AktuelleSchritteForm.myPlugin.batches.size() > 0}">
-						
+
                         <ul role="list" class="p-0">
                             <ui:repeat
                                 var="b"
                                 value="#{AktuelleSchritteForm.myPlugin.batches}">
                                 <li class="p-3 pb-4 border-bottom">
-                                        
+
                                     <button
                                         jsf:id="edit"
                                         class="btn btn-link btn-link-task d-block"
@@ -83,27 +83,27 @@
                                         jsf:action="#{AktuelleSchritteForm.myPlugin.assignToExistingBatch}"
                                         title="#{msgs.plugin_step_batch_assignment_assignToThisBatch}"
                                         data-bs-toggle="tooltip">
-                                        
+
                                         <span class="btn btn-link border">
                                             <span class="fa fa-lg #{AktuelleSchritteForm.myPlugin.step.prozess.batch != null and b.batchId == AktuelleSchritteForm.myPlugin.step.prozess.batch.batchId ? 'fa-toggle-on text-success' : 'fa-toggle-off'}" />
                                         </span>
-                
+
                                         <h:outputText styleClass="fw-bold" value="#{msgs.batch}: #{b.batchId}" rendered="#{b.batchName == null or b.batchName == ''}"/>
                                         <span class="fw-bold">#{b.batchName}</span>
                                         <f:setPropertyActionListener target="#{AktuelleSchritteForm.myPlugin.batch}" value="#{b}" />
                                     </button>
-                                            
+
                                     <!-- LIST OF PROPERTIES -->
                                     <dl class="definition-list border border-bottom-0 mt-2" style="grid-template-columns:50% auto;">
-                                    
+
                                         <dt class="definition-list-term">
                                              <h:outputText value="#{msgs.prozesse}:" />
                                         </dt>
                                         <dd class="definition-list-description">
                                             <h:outputText value="#{b.numberOfProcesses}" />
                                         </dd>
-                                                                                                
-                                            
+
+
                                         <ui:repeat
                                             var="property"
                                             value="#{b.properties}">
@@ -195,11 +195,11 @@
                             	</li>
                             </ui:repeat>
                         </ul>
-                            
+
                         <!-- BUTTONS -->
                         <div class="box__actions" jsf:rendered="#{AktuelleSchritteForm.myPlugin.step.prozess.batch != null}">
-                            
-                            
+
+
                             <!-- BUTTON TO SHOW THE MODAL -->
                             <button
                                 id="myStyleModalButton"
@@ -212,10 +212,10 @@
                                 <span>#{msgs.plugin_step_batch_assignment_lockBatch}</span>
                             </button>
                             <!-- // BUTTON TO SHOW THE MODAL -->
-                            
+
                         </div>
                         <!-- // BUTTONS -->
-                        
+
 					</h:panelGroup>
                     <!-- // TAB 1 - SELECT FROM THE EXISTING BATCHES -->
 
@@ -224,14 +224,14 @@
 						class="p-0"
 						layout="block"
 						rendered="#{NavigationForm.uiStatus.batchassign eq 'tab2' or AktuelleSchritteForm.myPlugin.batches.size() == 0}">
-						
+
                         <intranda:formInputText
                             id="input1"
                             name="titel"
                             label="#{msgs.plugin_step_batch_assignment_batchTitle}"
                             field="#{AktuelleSchritteForm.myPlugin.batchNewTitle}"
                             help="#{msgs.plugin_step_batch_assignment_batchTitle_help}" />
-                        
+
                         <!-- ITERATE THROUGH ALL PROPERTIES TO LIST THEM -->
                         <c:forEach
                             var="myprocess_item"
@@ -444,9 +444,9 @@
                                 </div>
                             </h:panelGroup>
                         </c:forEach>
-                     
+
                         <!-- // ITERATE THROUGH ALL PROPERTIES TO LIST THEM -->
-                            
+
                         <!-- BUTTONS -->
                         <div class="box__actions">
                         	<button
@@ -459,7 +459,7 @@
         					</button>
                         </div>
                         <!-- // BUTTONS -->
-                
+
 					</h:panelGroup>
                     <!-- // TAB 2 - CREATE A NEW BATCH -->
 
@@ -467,7 +467,7 @@
 				</div>
 
 			</intranda:box>
-        
+
             <!-- THE MODAL -->
             <div
                 class="modal fade"
@@ -492,7 +492,7 @@
                             #{msgs.plugin_step_batch_assignment_lockBatchDescription}
                         </div>
                         <div class="modal-footer">
-                            
+
                             <button
                                 class="btn btn-blank"
                                 jsf:id="docket"
@@ -501,7 +501,7 @@
                                 <span class="fa fa-print" />
                                 <span>#{msgs.plugin_step_batch_assignment_downloadDocket}</span>
                             </button>
-    
+
                             <button
                                 class="btn btn-success"
                                 jsf:id="closeBatch"
@@ -511,7 +511,7 @@
                                 <span class="fa fa-check" style="margin-left:-6px"/>
                                 <span>#{msgs.plugin_step_batch_assignment_lockBatch}</span>
                             </button>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -519,5 +519,5 @@
             <!-- // THE MODAL -->
 
 		</h:form>
-        
+
 </ui:composition>
