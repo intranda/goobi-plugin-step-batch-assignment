@@ -3,9 +3,7 @@ package de.intranda.goobi.plugins;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 
 /**
  * This file is part of a plugin for Goobi - a Workflow tool for the support of mass digitization.
@@ -26,14 +24,16 @@ import java.util.Date;
  *
  */
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.stream.Collectors;
 
+import io.goobi.workflow.api.vocabulary.VocabularyAPIManager;
+import io.goobi.workflow.api.vocabulary.helper.ExtendedVocabularyRecord;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.goobi.beans.Batch;
 import org.goobi.beans.Institution;
@@ -69,6 +69,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
+import org.goobi.production.properties.Type;
 
 @PluginImplementation
 @Log4j2
@@ -91,7 +92,7 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
     @Setter
     private String batchNewTitle;
     private String batchWaitStep;
-    private List<String> propertyNames;
+    private List<PropertyDefinition> propertyDefinitions;
     @Getter
     private List<ProcessProperty> properties;
 
@@ -105,20 +106,72 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
         SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
         batchWaitStep = myconfig.getString("batchWaitStep");
         properties = new ArrayList<>();
-        propertyNames = Arrays.asList(myconfig.getStringArray("property"));
+        propertyDefinitions = loadPropertyDefinitions(myconfig);
 
         // first load the property configuration
         List<ProcessProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(step.getProzess());
         for (ProcessProperty pt : plist) {
-            if (propertyNames.contains(pt.getName())) {
-                properties.add(pt);
+            Optional<PropertyDefinition> propertyDefinition = propertyDefinitions.stream()
+                    .filter(pd -> pd.getName().equals(pt.getName()))
+                    .findFirst();
+
+            // skip if this property is not configured
+            if (propertyDefinition.isEmpty()) {
+                continue;
             }
+
+            Optional<String> vocabularyFilterField = Optional.ofNullable(propertyDefinition.get().getVocabularyFilterField());
+            Optional<String> vocabularyFilterValue = Optional.ofNullable(propertyDefinition.get().getVocabularyFilterValue());
+
+            // vocabulary filter
+            if (vocabularyFilterField.isPresent() && vocabularyFilterValue.isPresent()) {
+                if (Type.VOCABULARYREFERENCE.equals(pt.getType()) || Type.VOCABULARYMULTIREFERENCE.equals(pt.getType())) {
+                    pt.getPossibleValues().removeIf(s -> !doesMatchVocabularyFilter((String) s.getValue(), vocabularyFilterField.get(), vocabularyFilterValue.get()));
+                } else {
+                    log.warn("Vocabulary filter defined for non-vocabularyreference property: {}", pt.getName());
+                }
+            }
+
+            properties.add(pt);
         }
 
         // get a list of all open batches
         collectAvailableBatches();
 
         log.info("BatchAssignment step plugin initialized");
+    }
+
+    private boolean doesMatchVocabularyFilter(String recordId, String fieldName, String expectedValue) {
+        try {
+            ExtendedVocabularyRecord rec = VocabularyAPIManager.getInstance().vocabularyRecords().get(Long.parseLong(recordId));
+            Optional<String> value = rec.getFieldValueForDefinitionName(fieldName);
+            if (value.isEmpty()) {
+                log.warn("Vocabulary record doesn't contain filter field: {}", fieldName);
+                return false;
+            }
+            return value.get().equals(expectedValue);
+        } catch (NumberFormatException e) {
+            log.error("Unable to parse vocabulary recordId: {}", recordId);
+            return false;
+        }
+    }
+
+    private List<PropertyDefinition> loadPropertyDefinitions(SubnodeConfiguration myconfig) {
+        return myconfig.configurationsAt("property")
+                .stream()
+                .map(this::parsePropertyDefinition)
+                .toList();
+    }
+
+    private PropertyDefinition parsePropertyDefinition(HierarchicalConfiguration rawProperty) {
+        String name = rawProperty.getString(".");
+        String filterField = rawProperty.getString("@vocabularyPropertyFilterField", null);
+        String filterValue = rawProperty.getString("@vocabularyPropertyFilterValue", null);
+        PropertyDefinition result = new PropertyDefinition();
+        result.setName(name);
+        result.setVocabularyFilterField(filterField);
+        result.setVocabularyFilterValue(filterValue);
+        return result;
     }
 
     /**
@@ -144,7 +197,7 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
                 Process p = processes.get(0);
                 List<ProcessProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(p);
                 for (ProcessProperty prop : plist) {
-                    if (propertyNames.contains(prop.getName())) {
+                    if (propertyDefinitions.stream().anyMatch(d -> d.getName().equals(prop.getName()))) {
                         mb.getProperties().add(prop);
                     }
                 }
@@ -183,7 +236,7 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
             Process firstProcess = processes.get(0);
 
             for (Processproperty prop : firstProcess.getEigenschaften()) {
-                if (propertyNames.contains(prop.getTitel())) {
+                if (propertyDefinitions.stream().anyMatch(d -> d.getName().equals(prop.getTitel()))) {
 
                     // try to set the existing property to the same value
                     boolean found = false;
