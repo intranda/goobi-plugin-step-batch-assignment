@@ -3,6 +3,7 @@ package de.intranda.goobi.plugins;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -184,10 +185,13 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
                         20, null);
         
         // then add all batches to the list, that are currently empty
-        // TODO check if this works
-        allBatches.addAll(ProcessManager.getEmptyBatches());
-    	
-    	// create minibatches for user interface
+        try {
+            allBatches.addAll(ProcessManager.getEmptyBatches());
+        } catch (SQLException e) {
+            log.warn("Unable to retrieve empty batches", e);
+        }
+
+        // create minibatches for user interface
         batches = new ArrayList<>();
         for (Batch b : allBatches) {
             MiniBatch mb = new MiniBatch();
