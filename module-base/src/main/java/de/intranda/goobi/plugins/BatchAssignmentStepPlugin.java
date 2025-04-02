@@ -184,8 +184,9 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
                         20, null);
         
         // then add all batches to the list, that are currently empty
-        // TODO add the empty batches here into allBaches-List
-        
+        // TODO check if this works
+        allBatches.addAll(ProcessManager.getEmptyBatches());
+    	
     	// create minibatches for user interface
         batches = new ArrayList<>();
         for (Batch b : allBatches) {
