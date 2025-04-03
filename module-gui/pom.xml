@@ -2,10 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.goobi.workflow.plugin</groupId>
-    <artifactId>plugin-step-batch-assignement</artifactId>
-    <version>24.12</version>
+    <artifactId>plugin-step-batch-assignment</artifactId>
+    <version>25.03</version>
   </parent>
-  <artifactId>plugin-step-batch-assignement-gui</artifactId>
+  <artifactId>plugin-step-batch-assignment-gui</artifactId>
   <packaging>jar</packaging>
   <build>
     <resources>

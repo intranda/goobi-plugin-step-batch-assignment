@@ -12,10 +12,13 @@
         <project>*</project>
         <step>*</step>
         
-        <!-- sample parameter -->
-        <value>test</value>
-        <!-- display button to finish the task directly from within the entered plugin -->
-        <allowTaskFinishButtons>true</allowTaskFinishButtons>
+        <!-- batch is complete step in the workflow that shall be finished once the last process is added to the batch -->
+        <batchWaitStep>Waiting for batch completion</batchWaitStep>
+
+        <!-- properties to be editable for new batches -->
+        <property vocabularyPropertyFilterField="Working" vocabularyPropertyFilterValue="Yes">Scanner</property>
+        <property>Opening angle</property>
+
     </config>
 
 </config_plugin>
