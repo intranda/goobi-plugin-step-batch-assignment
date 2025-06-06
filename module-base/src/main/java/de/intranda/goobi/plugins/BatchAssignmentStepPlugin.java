@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.goobi.beans.Batch;
+import org.goobi.beans.GoobiProperty;
 import org.goobi.beans.Institution;
 import org.goobi.beans.JournalEntry;
 import org.goobi.beans.JournalEntry.EntryType;
@@ -53,7 +54,7 @@ import org.goobi.production.enums.PluginType;
 import org.goobi.production.enums.StepReturnValue;
 import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.plugin.interfaces.IStepPluginVersion2;
-import org.goobi.production.properties.ProcessProperty;
+import org.goobi.production.properties.DisplayProperty;
 import org.goobi.production.properties.PropertyParser;
 
 import de.sub.goobi.config.ConfigPlugins;
@@ -95,7 +96,7 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
     private String batchWaitStep;
     private List<PropertyDefinition> propertyDefinitions;
     @Getter
-    private List<ProcessProperty> properties;
+    private List<DisplayProperty> properties;
 
     @Override
     public void initialize(Step step, String returnPath) {
@@ -110,8 +111,8 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
         propertyDefinitions = loadPropertyDefinitions(myconfig);
 
         // first load the property configuration
-        List<ProcessProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(step.getProzess());
-        for (ProcessProperty pt : plist) {
+        List<DisplayProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(step.getProzess());
+        for (DisplayProperty pt : plist) {
             Optional<PropertyDefinition> propertyDefinition = propertyDefinitions.stream()
                     .filter(pd -> pd.getName().equals(pt.getName()))
                     .findFirst();
@@ -206,8 +207,8 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
             // get desired properties of the first process in existing batch
             if (!processes.isEmpty()) {
                 Process p = processes.get(0);
-                List<ProcessProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(p);
-                for (ProcessProperty prop : plist) {
+                List<DisplayProperty> plist = PropertyParser.getInstance().getPropertiesForProcess(p);
+                for (DisplayProperty prop : plist) {
                     if (propertyDefinitions.stream().anyMatch(d -> d.getName().equals(prop.getName()))) {
                         mb.getProperties().add(prop);
                     }
@@ -246,16 +247,16 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
         if (!processes.isEmpty()) {
             Process firstProcess = processes.get(0);
 
-            for (Processproperty prop : firstProcess.getEigenschaften()) {
+            for (GoobiProperty prop : firstProcess.getEigenschaften()) {
                 if (propertyDefinitions.stream().anyMatch(d -> d.getName().equals(prop.getTitel()))) {
 
                     // try to set the existing property to the same value
                     boolean found = false;
-                    for (Processproperty myprop : p.getEigenschaften()) {
+                    for (GoobiProperty myprop : p.getEigenschaften()) {
                         if (myprop.getTitel().equals(prop.getTitel())) {
                             found = true;
                             myprop.setWert(prop.getWert());
-                            PropertyManager.saveProcessProperty(myprop);
+                            PropertyManager.saveProperty(myprop);
                             break;
                         }
                     }
@@ -293,7 +294,7 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
         Batch newBatch = new Batch();
         newBatch.setBatchName(batchNewTitle);
         step.getProzess().setBatch(newBatch);
-        for (ProcessProperty pp : properties) {
+        for (DisplayProperty pp : properties) {
             if (pp.getProzesseigenschaft() == null) {
                 Processproperty pe = new Processproperty();
                 pe.setProzess(step.getProzess());
@@ -301,7 +302,7 @@ public class BatchAssignmentStepPlugin implements IStepPluginVersion2 {
                 step.getProzess().getEigenschaften().add(pe);
                 pp.transfer();
             } else {
-                for (Processproperty pe : step.getProzess().getEigenschaften()) {
+                for (GoobiProperty pe : step.getProzess().getEigenschaften()) {
                     if (pe.getTitel().equals(pp.getName())) {
                         pe.setWert(pp.getValue());
                     }
