@@ -3,7 +3,7 @@ package de.intranda.goobi.plugins;
 import java.io.Serializable;
 import java.util.List;
 
-import org.goobi.production.properties.ProcessProperty;
+import org.goobi.production.properties.DisplayProperty;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,5 +15,5 @@ public class MiniBatch implements Serializable {
     private Integer batchId;
     private String batchName;
     private int numberOfProcesses;
-    private List<ProcessProperty> properties;
+    private List<DisplayProperty> properties;
 }
