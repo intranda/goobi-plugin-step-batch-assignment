@@ -3,6 +3,10 @@ title: Batch zuweisen
 identifier: intranda_step_batch_assignment
 description: Step Plugin für die Zuweisung des Vorgangs zu einem bestehenden oder neuen Batch
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Step Plugin
 ---
 
 ## Einführung

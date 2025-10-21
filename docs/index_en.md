@@ -3,6 +3,10 @@ title: Assign batch
 identifier: intranda_step_batch_assignment
 description: Step plugin for assigning the process to an existing or new batch
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Step Plugin
 ---
 
 ## Introduction
