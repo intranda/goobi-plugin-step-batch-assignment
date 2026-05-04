@@ -18,7 +18,11 @@ import org.goobi.beans.Project;
 import org.goobi.beans.Ruleset;
 import org.goobi.beans.Step;
 import org.goobi.beans.User;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -128,14 +132,13 @@ public class BatchAssignmentPluginTest {
         PowerMock.mockStatic(MetadatenHelper.class);
         EasyMock.expect(MetadatenHelper.getMetaFileType(EasyMock.anyString())).andReturn("mets").anyTimes();
         EasyMock.expect(MetadatenHelper.getFileformatByName(EasyMock.anyString(), EasyMock.anyObject())).andReturn(ff).anyTimes();
-        EasyMock.expect(MetadatenHelper.getMetadataOfFileformat(EasyMock.anyObject(), EasyMock.anyBoolean()))
+        EasyMock.expect(MetadatenHelper.getMetadataOfFileformat(EasyMock.anyObject()))
                 .andReturn(Collections.emptyMap())
                 .anyTimes();
         PowerMock.replay(MetadatenHelper.class);
 
         PowerMock.mockStatic(MetadataManager.class);
         MetadataManager.updateMetadata(1, Collections.emptyMap());
-        MetadataManager.updateJSONMetadata(1, Collections.emptyMap());
         PowerMock.replay(MetadataManager.class);
         PowerMock.replay(ConfigurationHelper.class);
 
