@@ -11,6 +11,7 @@
     xmlns:p="http://primefaces.org/ui"
     xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:util="http://goobi.io/util"
     xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
 
 
@@ -26,7 +27,7 @@
 
 				<intranda:boxTitle
 					title="#{msgs.plugin}: #{msgs[('plugin_').concat(AktuelleSchritteForm.myPlugin.title)]}"
-					icon="fa-puzzle-piece">
+					icon="puzzle-piece">
 					<ul class="tabs">
 						<li
                             jsf:rendered="#{AktuelleSchritteForm.myPlugin.batches.size() > 0}"
@@ -85,7 +86,7 @@
                                         data-bs-toggle="tooltip">
 
                                         <span class="btn btn-link border">
-                                            <span class="fa fa-lg #{AktuelleSchritteForm.myPlugin.step.prozess.batch != null and b.batchId == AktuelleSchritteForm.myPlugin.step.prozess.batch.batchId ? 'fa-toggle-on text-success' : 'fa-toggle-off'}" />
+                                            <util:icon icon="#{AktuelleSchritteForm.myPlugin.step.prozess.batch != null and b.batchId == AktuelleSchritteForm.myPlugin.step.prozess.batch.batchId ? 'toggle-right' : 'toggle-left'}" styleClass="#{AktuelleSchritteForm.myPlugin.step.prozess.batch != null and b.batchId == AktuelleSchritteForm.myPlugin.step.prozess.batch.batchId ? 'text-success' : ''}" />
                                         </span>
 
                                         <h:outputText styleClass="fw-bold" value="#{msgs.batch}: #{b.batchId}" rendered="#{b.batchName == null or b.batchName == ''}"/>
@@ -178,14 +179,10 @@
                                                     </h:panelGroup>
                                                     <h:panelGroup rendered="#{property.type.name == 'boolean'}">
                                                         <h:panelGroup rendered="#{property.readValue eq 'true'}">
-                                                            <span
-                                                                aria-hidden="true"
-                                                                class="fa fa-check-square-o fa-lg" />
+                                                            <util:icon icon="square-check" />
                                                         </h:panelGroup>
                                                         <h:panelGroup rendered="#{property.readValue ne 'true'}">
-                                                            <span
-                                                                aria-hidden="true"
-                                                                class="fa fa-square-o fa-lg" />
+                                                            <util:icon icon="square" />
                                                         </h:panelGroup>
                                                     </h:panelGroup>
                                                 </dd>
@@ -207,8 +204,7 @@
                                 class="btn btn-success"
                                 data-bs-toggle="modal"
                                 data-bs-target="#myStyleModal">
-                                <span class="fa fa-check" />
-                                <span class="fa fa-check" style="margin-left:-6px"/>
+                                <util:icon icon="check" double="#{true}" />
                                 <span>#{msgs.plugin_step_batch_assignment_lockBatch}</span>
                             </button>
                             <!-- // BUTTON TO SHOW THE MODAL -->
@@ -454,7 +450,7 @@
         						jsf:id="absenden"
         						type="submit"
         						jsf:action="#{AktuelleSchritteForm.myPlugin.assignToNewBatch}">
-        						<span class="fa fa-save" />
+                                <util:icon icon="device-floppy" />
         						<span>#{msgs.plugin_step_batch_assignment_createNewBatch}</span>
         					</button>
                         </div>
@@ -485,7 +481,7 @@
                             </h4>
                             <button type="button" class="btn text-white"
                                 title="#{msgs.cancel}" data-bs-dismiss="modal">
-                                <span class="fa fa-times" />
+                                <util:icon icon="times" />
                             </button>
                         </div>
                         <div class="modal-body">
@@ -498,7 +494,7 @@
                                 jsf:id="docket"
                                 type="submit"
                                 jsf:action="#{AktuelleSchritteForm.myPlugin.generateBatchDocket}">
-                                <span class="fa fa-print" />
+                                <util:icon icon="printer" />
                                 <span>#{msgs.plugin_step_batch_assignment_downloadDocket}</span>
                             </button>
 
@@ -507,8 +503,7 @@
                                 jsf:id="closeBatch"
                                 type="submit"
                                 jsf:action="#{AktuelleSchritteForm.myPlugin.lockBatch}">
-                                <span class="fa fa-check" />
-                                <span class="fa fa-check" style="margin-left:-6px"/>
+                                <util:icon icon="check" double="#{true}" />
                                 <span>#{msgs.plugin_step_batch_assignment_lockBatch}</span>
                             </button>
 
